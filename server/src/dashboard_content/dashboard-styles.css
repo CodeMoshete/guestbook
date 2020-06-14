@@ -1,0 +1,63 @@
+body, html {
+  height: 100%;
+  margin: 0;
+  font: 400 15px/1.8 "Lato", sans-serif;
+  color: #777;
+}
+
+.bgimg-1, .bgimg-2, .bgimg-3 {
+  position: relative;
+  opacity: 0.65;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+}
+.bgimg-1 {
+  background-image: url("bg-test.png");
+  height: 100%;
+}
+
+.caption {
+  position: absolute;
+  left: 0;
+  top: 10%;
+  width: 100%;
+  text-align: center;
+  color: #000;
+  display: inline;
+  vertical-align: top;
+}
+
+.inputContainer {
+  background-color: #0006;
+  text-align: center;
+  display: inline-block;
+  width: 40%;
+  padding: 1%;
+}
+
+.caption span.border {
+  color: #fff;
+  font-size: 25px;
+  letter-spacing: 10px;
+}
+
+.caption span.border2 {
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: 10px;
+}
+
+.caption span.border3 {
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 10px;
+}
+
+h3 {
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  font: 20px "Lato", sans-serif;
+  color: #111;
+}
