@@ -32,18 +32,17 @@ exports.showDashboard = async function showDashboard(serverIp) {
 
   let alreadySignedContent = '';
   let yourEntryContent = '';
+  let entryContent = '';
   const entriesListPath = path.join(global.appRoot, 'guestbook_data', 'messages.json');
   if (fs.existsSync(entriesListPath)) {
     const entriesContent = JSON.parse(fs.readFileSync(entriesListPath));
     const allEntriesKeys = Object.keys(entriesContent);
-    let entryContent = '';
     const numEntiesToDisplay = Math.min(allEntriesKeys.length, 10);
     for (let i = 0; i < numEntiesToDisplay; i += 1) {
       if (allEntriesKeys[i] !== clientIp) {
         entryContent += generateEntry(entriesContent[allEntriesKeys[i]]);
       }
     }
-    html = html.split('/*ENTRIES-CONTENT*/').join(entryContent);
 
     if (entriesContent[clientIp] !== undefined) {
       alreadySignedContent = 'YOU SIGNED THIS GUEST BOOK ALREADY, ' +
@@ -52,6 +51,7 @@ exports.showDashboard = async function showDashboard(serverIp) {
     }
   }
 
+  html = html.split('/*ENTRIES-CONTENT*/').join(entryContent);
   html = html.split('/*ALREADY-SIGNED*/').join(alreadySignedContent);
   html = html.split('/*YOUR-ENTRY*/').join(yourEntryContent);
 
