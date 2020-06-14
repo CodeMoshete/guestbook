@@ -2,6 +2,7 @@ const debug = require('debug')('guestbook-server');
 const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
+const ip = require('ip');
 
 function generateEntry(entry) {
   let html = `<p>${entry.name}</p>`;
@@ -22,7 +23,8 @@ exports.showDashboard = function showDashboard() {
 
   const scriptsPath =
     path.join(global.appRoot, 'src', 'dashboard_content', 'dashboard-scripts.js');
-  const scriptsContent = fs.readFileSync(scriptsPath);
+  let scriptsContent = fs.readFileSync(scriptsPath).toString();
+  scriptsContent = scriptsContent.split('/*IP-ADDRESS*/').join(ip.address());
   html = html.split('/*SCRIPTS-CONTENT*/').join(scriptsContent);
 
   return html;
