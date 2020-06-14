@@ -32,6 +32,23 @@ html {
   padding: 1%;
 }
 
+.entryContainer {
+  background-color: #0006;
+  display: inline-block;
+  width: 40%;
+  padding: 1%;
+}
+
+.entryText {
+  text-align: left;
+  color: #ccc;
+}
+
+.entryName {
+  text-align: left;
+  color: #fff;
+}
+
 .caption span.border {
   color: #fff;
   font-size: 25px;
@@ -48,6 +65,12 @@ html {
   color: #fff;
   font-size: 12px;
   letter-spacing: 10px;
+}
+
+.caption span.border4 {
+  color: #aaa;
+  font-size: 12px;
+  letter-spacing: 5px;
 }
 
 h3 {

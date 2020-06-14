@@ -11,7 +11,8 @@ router.route('/signGuestBook')
     debug(`Signing guestbook!\n${util.inspect(req.body)}`);
     const guestName = req.body.name;
     const guestMessage = req.body.message;
-    guestbookManager.signGuestbook(guestName, guestMessage);
+    const ipAddress = req.body.ip;
+    guestbookManager.signGuestbook(guestName, guestMessage, ipAddress);
     res.sendStatus(200);
   });
 
@@ -31,8 +32,9 @@ router.route('/getRandomGuestbookMessage')
   });
 
 router.route('/')
-  .get((req, res) => {
-    const content = guestbookDashboard.showDashboard();
+  .get(async (req, res) => {
+    const serverIp = req.headers.host.split(':')[0];
+    const content = await guestbookDashboard.showDashboard(serverIp);
     res.send(content);
   });
 

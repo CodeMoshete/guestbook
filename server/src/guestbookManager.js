@@ -15,16 +15,16 @@ function getIsLive() {
   return isLive;
 }
 
-exports.signGuestbook = function signGuestbook(guestName, guestMessage) {
+exports.signGuestbook = function signGuestbook(guestName, guestMessage, guestIp) {
   const isLive = getIsLive();
   const messagesFile = isLive ? liveMessageFileName : messagesFileName;
   const dataPath = path.join(global.appRoot, 'guestbook_data');
   const messagesFilePath = path.join(dataPath, messagesFile);
-  let messagesContent = [];
+  let messagesContent = {};
   if (fs.existsSync(messagesFilePath)) {
     messagesContent = JSON.parse(fs.readFileSync(messagesFilePath));
   }
-  messagesContent.push({ name: guestName, message: guestMessage });
+  messagesContent[guestIp] = { name: guestName, message: guestMessage };
   fs.writeFileSync(messagesFilePath, JSON.stringify(messagesContent, null, 2));
 };
 
@@ -34,10 +34,10 @@ exports.getRandomMessage = function getRandomMessage() {
   const liveMessagesFilePath = path.join(dataPath, liveMessageFileName);
   let isLive = getIsLive() && fs.existsSync(liveMessagesFilePath);
 
-  let messagesContent = [];
+  let messagesContent = {};
   if (isLive) {
     messagesContent = JSON.parse(fs.readFileSync(liveMessagesFilePath));
-    isLive = messagesContent.length > 0;
+    isLive = Object.keys(messagesContent.length > 0);
   }
 
   if (!isLive && fs.existsSync(messagesFilePath)) {
@@ -45,16 +45,18 @@ exports.getRandomMessage = function getRandomMessage() {
   }
 
   let returnMessage = {};
-  if (messagesContent.length > 0) {
-    const randomIndex = Math.floor(Math.random() * messagesContent.length);
-    returnMessage = messagesContent[randomIndex];
+  const keys = Object.keys(messagesContent);
+  if (keys.length > 0) {
+    const randomIndex = Math.floor(Math.random() * keys.length);
+    const randomKey = keys[randomIndex];
+    returnMessage = messagesContent[randomKey];
 
     if (isLive) {
-      messagesContent.splice(randomIndex, 1);
+      delete messagesContent[randomKey];
       fs.writeFileSync(liveMessagesFilePath, JSON.stringify(messagesContent, null, 2));
 
       messagesContent = JSON.parse(fs.readFileSync(messagesFilePath));
-      messagesContent.push(returnMessage);
+      messagesContent[randomKey] = returnMessage;
       fs.writeFileSync(messagesFilePath, JSON.stringify(messagesContent, null, 2));
     }
   }
@@ -76,11 +78,12 @@ exports.setLiveStatus = function setLiveStatus(liveStatus) {
     }
 
     const liveMessagesContent = JSON.parse(fs.readFileSync(liveMessagesFilePath));
-    for (let i = 0, count = liveMessagesContent.length; i < count; i += 1) {
-      messagesContent.push(liveMessagesContent[i]);
+    const messageKeys = Object.keys(liveMessagesContent);
+    for (let i = 0, count = messageKeys.length; i < count; i += 1) {
+      messagesContent[messageKeys[i]] = liveMessagesContent[messageKeys[i]];
     }
 
-    fs.writeFileSync(liveMessagesFilePath, JSON.stringify([], null, 2));
+    fs.writeFileSync(liveMessagesFilePath, JSON.stringify({}, null, 2));
     fs.writeFileSync(messagesFilePath, JSON.stringify(messagesContent, null, 2));
   }
 };
