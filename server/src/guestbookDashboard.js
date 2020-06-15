@@ -1,6 +1,5 @@
 const debug = require('debug')('guestbook-server');
 const path = require('path');
-const ip = require('public-ip');
 const fs = require('fs');
 
 function generateEntry(entry) {
@@ -11,7 +10,7 @@ function generateEntry(entry) {
   return html;
 }
 
-exports.showDashboard = async function showDashboard(serverIp) {
+exports.showDashboard = async function showDashboard(serverIp, clientIp) {
   debug('Show Dashboard');
   const htmlPath =
     path.join(global.appRoot, 'src', 'dashboard_content', 'dashboard-content.html');
@@ -22,7 +21,6 @@ exports.showDashboard = async function showDashboard(serverIp) {
   const stylesContent = fs.readFileSync(stylesPath);
   html = html.split('/*STYLES-CONTENT*/').join(stylesContent);
 
-  const clientIp = await ip.v4();
   const scriptsPath =
     path.join(global.appRoot, 'src', 'dashboard_content', 'dashboard-scripts.js');
   let scriptsContent = fs.readFileSync(scriptsPath).toString();

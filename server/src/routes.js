@@ -34,7 +34,8 @@ router.route('/getRandomGuestbookMessage')
 router.route('/')
   .get(async (req, res) => {
     const serverIp = req.headers.host.split(':')[0];
-    const content = await guestbookDashboard.showDashboard(serverIp);
+    const clientIp = req.connection.remoteAddress;
+    const content = await guestbookDashboard.showDashboard(serverIp, clientIp);
     res.send(content);
   });
 
