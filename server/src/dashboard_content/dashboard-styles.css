@@ -103,7 +103,7 @@ textarea {
   font: 400 15px/1.8 "Lato", sans-serif;
 }
 
-input[type=submit] {
+.submitBtn {
   width: 100%;
   background-color: #4CAF50;
   color: white;
