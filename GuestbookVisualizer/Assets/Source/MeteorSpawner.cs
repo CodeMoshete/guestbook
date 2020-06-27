@@ -3,7 +3,7 @@
 [RequireComponent(typeof(BoxCollider))]
 public class MeteorSpawner : MonoBehaviour
 {
-    private const float RANDOM_SPAWN_RATE_SECONDS = 20f;
+    private const float RANDOM_SPAWN_RATE_SECONDS = 1f;
 
     public GameObject MeteorPrefab;
     public Vector3 MinVelocity;
@@ -19,7 +19,7 @@ public class MeteorSpawner : MonoBehaviour
     private void Update()
     {
         float showChance = Time.deltaTime / RANDOM_SPAWN_RATE_SECONDS;
-        bool spawnMeteor = Random.Range(0, 1) <= showChance;
+        bool spawnMeteor = Random.Range(0f, 1f) <= showChance;
         if (spawnMeteor)
         {
             float xVal = Random.Range(MinVelocity.x, MaxVelocity.x);
@@ -32,7 +32,7 @@ public class MeteorSpawner : MonoBehaviour
             xVal = Random.Range(boxCollider.bounds.max.x, boxCollider.bounds.min.x);
             yVal = Random.Range(boxCollider.bounds.max.y, boxCollider.bounds.min.y);
             zVal = Random.Range(boxCollider.bounds.max.z, boxCollider.bounds.min.z);
-            Vector3 spawnPos = new Vector3(xVal, yVal, zVal) + transform.position;
+            Vector3 spawnPos = new Vector3(xVal, yVal, zVal);// + transform.position;
             meteor.transform.position = spawnPos;
         }
     }
