@@ -13,7 +13,7 @@ public class EntryResponse
 public class Engine : MonoBehaviour
 {
     private const float QUERY_TIME = 1f;
-    private const float QUERY_CHANCE = 0.125f;
+    private const float QUERY_CHANCE = 0.067f;
 
     public GameObject FireworkEffect;
     public List<MessageContainer> MessageContainers;
@@ -26,6 +26,12 @@ public class Engine : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+            return;
+        }
+
         queryTime -= Time.deltaTime;
         if (queryTime <= 0f)
         {
