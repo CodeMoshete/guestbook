@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const liveStatusFileName = 'live_status.json';
+const pendingMessagesFileName = 'messages_pending.json';
 const liveMessageFileName = 'messages_live.json';
 const messagesFileName = 'messages.json';
 
@@ -16,8 +17,7 @@ function getIsLive() {
 }
 
 exports.signGuestbook = function signGuestbook(guestName, guestMessage, guestIp) {
-  const isLive = getIsLive();
-  const messagesFile = isLive ? liveMessageFileName : messagesFileName;
+  const messagesFile = pendingMessagesFileName;
   const dataPath = path.join(global.appRoot, 'guestbook_data');
   const messagesFilePath = path.join(dataPath, messagesFile);
   let messagesContent = {};
@@ -84,6 +84,53 @@ exports.setLiveStatus = function setLiveStatus(liveStatus) {
     }
 
     fs.writeFileSync(liveMessagesFilePath, JSON.stringify({}, null, 2));
+    fs.writeFileSync(messagesFilePath, JSON.stringify(messagesContent, null, 2));
+  }
+};
+
+exports.approveEntry = function approveEntry(ipAddress) {
+  const isLive = getIsLive();
+  const messagesFile = isLive ? pendingMessagesFileName : messagesFileName;
+  const dataPath = path.join(global.appRoot, 'guestbook_data');
+  const messagesFilePath = path.join(dataPath, messagesFile);
+  let messagesContent = {};
+  if (fs.existsSync(messagesFilePath)) {
+    messagesContent = JSON.parse(fs.readFileSync(messagesFilePath));
+  }
+
+  const pendingMessagesPath = path.join(dataPath, pendingMessagesFileName);
+  if (fs.existsSync(pendingMessagesPath)) {
+    const pendingMessageContent = JSON.parse(fs.readFileSync(pendingMessagesPath));
+    messagesContent[ipAddress] = pendingMessageContent[ipAddress];
+    fs.writeFileSync(messagesFilePath, JSON.stringify(messagesContent, null, 2));
+    delete pendingMessageContent[ipAddress];
+    fs.writeFileSync(pendingMessagesPath, JSON.stringify(pendingMessageContent, null, 2));
+  }
+};
+
+exports.removeEntry = function approveEntry(ipAddress, queueName) {
+  const dataPath = path.join(global.appRoot, 'guestbook_data');
+  let queueFileName = '';
+  switch (queueName) {
+    case 'archive':
+      queueFileName = messagesFileName;
+      break;
+    case 'live':
+      queueFileName = liveMessageFileName;
+      break;
+    case 'pending':
+      queueFileName = pendingMessagesFileName;
+      break;
+    default:
+      // Intentionally empty.
+      break;
+  }
+
+  const messagesFilePath = path.join(dataPath, queueFileName);
+  let messagesContent = {};
+  if (fs.existsSync(messagesFilePath)) {
+    messagesContent = JSON.parse(fs.readFileSync(messagesFilePath));
+    delete messagesContent[ipAddress];
     fs.writeFileSync(messagesFilePath, JSON.stringify(messagesContent, null, 2));
   }
 };

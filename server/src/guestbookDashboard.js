@@ -31,22 +31,42 @@ exports.showDashboard = async function showDashboard(serverIp, clientIp) {
   let alreadySignedContent = '';
   let yourEntryContent = '';
   let entryContent = '';
+  let entriesContent = {};
   const entriesListPath = path.join(global.appRoot, 'guestbook_data', 'messages.json');
   if (fs.existsSync(entriesListPath)) {
-    const entriesContent = JSON.parse(fs.readFileSync(entriesListPath));
-    const allEntriesKeys = Object.keys(entriesContent);
-    const numEntiesToDisplay = Math.min(allEntriesKeys.length, 10);
-    for (let i = 0; i < numEntiesToDisplay; i += 1) {
-      if (allEntriesKeys[i] !== clientIp) {
-        entryContent += generateEntry(entriesContent[allEntriesKeys[i]]);
-      }
-    }
+    entriesContent = JSON.parse(fs.readFileSync(entriesListPath));
+  }
 
-    if (entriesContent[clientIp] !== undefined) {
-      alreadySignedContent = 'YOU SIGNED THIS GUEST BOOK ALREADY, ' +
-        'BUT YOU CAN RESUBMIT TO CHANGE YOUR ENTRY.';
-      yourEntryContent = generateEntry(entriesContent[clientIp]);
+  const liveEntriesPath = path.join(global.appRoot, 'guestbook_data', 'messages_live.json');
+  if (fs.existsSync(liveEntriesPath)) {
+    const liveEntriesContent = JSON.parse(fs.readFileSync(liveEntriesPath));
+    const liveKeys = Object.keys(liveEntriesContent);
+    for (let i = 0, count = liveKeys.length; i < count; i += 1) {
+      entriesContent[liveKeys[i]] = liveEntriesContent[liveKeys[i]];
     }
+  }
+
+  const allEntriesKeys = Object.keys(entriesContent);
+  const numEntiesToDisplay = Math.min(allEntriesKeys.length, 10);
+  for (let i = 0; i < numEntiesToDisplay; i += 1) {
+    if (allEntriesKeys[i] !== clientIp) {
+      entryContent += generateEntry(entriesContent[allEntriesKeys[i]]);
+    }
+  }
+
+  const pendigEntriesPath = path.join(global.appRoot, 'guestbook_data', 'messages_pending.json');
+  if (fs.existsSync(pendigEntriesPath)) {
+    const pendingEntriesContent = JSON.parse(fs.readFileSync(pendigEntriesPath));
+    const pendingKeys = Object.keys(pendingEntriesContent);
+    for (let i = 0, count = pendingKeys.length; i < count; i += 1) {
+      entriesContent[pendingKeys[i]] = pendingEntriesContent[pendingKeys[i]];
+    }
+  }
+
+  if (entriesContent[clientIp] !== undefined) {
+    alreadySignedContent = 'YOU SIGNED THIS GUEST BOOK ALREADY, ' +
+      'BUT YOU CAN RESUBMIT TO CHANGE YOUR ENTRY.';
+    yourEntryContent = generateEntry(entriesContent[clientIp]);
   }
 
   html = html.split('/*ENTRIES-CONTENT*/').join(entryContent);

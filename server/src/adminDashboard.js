@@ -4,56 +4,62 @@ const fs = require('fs');
 
 const contentDir = 'admin_dashboard_content';
 
-function generateEntry(entry) {
+function generateEntry(entryIp, entry, queueName) {
+  const isPending = queueName === 'pending';
   let html = '<div class="entryContainer">';
   html += `<p class="entryName"><b>${entry.name}</b></p>`;
   html += `<p class="entryText">${entry.message}</p>`;
+  if (isPending) {
+    html +=
+      '<button class="submitBtn" onclick="approveGuestbookEntry(' +
+      `'${entryIp}')">Approve</button>`;
+  }
+  html +=
+    '<button class="submitBtn" onclick="deleteGuestbookEntry(' +
+    `'${entryIp}', '${queueName}')">Delete</button>`;
   html += '</div></br></br>';
   return html;
 }
 
-exports.showDashboard = async function showDashboard(serverIp, clientIp) {
+function getContent(contentPath, queueName) {
+  let entriesHtml = '';
+  if (fs.existsSync(contentPath)) {
+    const entriesContent = JSON.parse(fs.readFileSync(contentPath));
+    const allEntriesKeys = Object.keys(entriesContent);
+    for (let i = 0, count = allEntriesKeys.length; i < count; i += 1) {
+      entriesHtml += generateEntry(
+        allEntriesKeys[i], entriesContent[allEntriesKeys[i]], queueName
+      );
+    }
+  }
+  return entriesHtml;
+}
+
+exports.showDashboard = async function showDashboard(serverIp) {
   debug('Show Dashboard');
   const htmlPath =
-    path.join(global.appRoot, 'src', contentDir, 'dashboard-content.html');
+    path.join(global.appRoot, 'src', contentDir, 'admin-dashboard-content.html');
   let html = fs.readFileSync(htmlPath).toString();
 
   const stylesPath =
-    path.join(global.appRoot, 'src', contentDir, 'dashboard-styles.css');
+    path.join(global.appRoot, 'src', 'dashboard_content', 'dashboard-styles.css');
   const stylesContent = fs.readFileSync(stylesPath);
   html = html.split('/*STYLES-CONTENT*/').join(stylesContent);
 
   const scriptsPath =
-    path.join(global.appRoot, 'src', contentDir, 'dashboard-scripts.js');
+    path.join(global.appRoot, 'src', contentDir, 'admin-dashboard-scripts.js');
   let scriptsContent = fs.readFileSync(scriptsPath).toString();
   scriptsContent = scriptsContent.split('/*SERVER-ADDRESS*/').join(serverIp);
-  scriptsContent = scriptsContent.split('/*CLIENT-ADDRESS*/').join(clientIp);
   html = html.split('/*SCRIPTS-CONTENT*/').join(scriptsContent);
 
-  let alreadySignedContent = '';
-  let yourEntryContent = '';
-  let entryContent = '';
-  const entriesListPath = path.join(global.appRoot, 'guestbook_data', 'messages.json');
-  if (fs.existsSync(entriesListPath)) {
-    const entriesContent = JSON.parse(fs.readFileSync(entriesListPath));
-    const allEntriesKeys = Object.keys(entriesContent);
-    const numEntiesToDisplay = Math.min(allEntriesKeys.length, 10);
-    for (let i = 0; i < numEntiesToDisplay; i += 1) {
-      if (allEntriesKeys[i] !== clientIp) {
-        entryContent += generateEntry(entriesContent[allEntriesKeys[i]]);
-      }
-    }
+  const pendingListPath = path.join(global.appRoot, 'guestbook_data', 'messages_pending.json');
+  html = html.replace('/*PENDING_ENTRIES_CONTENT*/', getContent(pendingListPath, 'pending'));
 
-    if (entriesContent[clientIp] !== undefined) {
-      alreadySignedContent = 'YOU SIGNED THIS GUEST BOOK ALREADY, ' +
-        'BUT YOU CAN RESUBMIT TO CHANGE YOUR ENTRY.';
-      yourEntryContent = generateEntry(entriesContent[clientIp]);
-    }
-  }
+  const liveListPath = path.join(global.appRoot, 'guestbook_data', 'messages_live.json');
+  html = html.replace('/*LIVE_ENTRIES_CONTENT*/', getContent(liveListPath, 'live'));
 
-  html = html.split('/*ENTRIES-CONTENT*/').join(entryContent);
-  html = html.split('/*ALREADY-SIGNED*/').join(alreadySignedContent);
-  html = html.split('/*YOUR-ENTRY*/').join(yourEntryContent);
+  const archivedListPath = path.join(global.appRoot, 'guestbook_data', 'messages.json');
+  html = html.replace('/*ARCHIVED_ENTRIES_CONTENT*/', getContent(archivedListPath, 'archive'));
 
   return html;
 };

@@ -3,6 +3,7 @@ const express = require('express');
 const util = require('util');
 const guestbookManager = require('./guestbookManager.js');
 const guestbookDashboard = require('./guestbookDashboard.js');
+const adminDashboard = require('./adminDashboard.js');
 
 const router = express.Router();
 
@@ -13,6 +14,23 @@ router.route('/signGuestBook')
     const guestMessage = req.body.message;
     const ipAddress = req.body.ip;
     guestbookManager.signGuestbook(guestName, guestMessage, ipAddress);
+    res.sendStatus(200);
+  });
+
+router.route('/approveEntry')
+  .post(async (req, res) => {
+    debug(`Approving guestbook entry!\n${util.inspect(req.body)}`);
+    const ipAddress = req.body.ip;
+    guestbookManager.approveEntry(ipAddress);
+    res.sendStatus(200);
+  });
+
+router.route('/removeEntry')
+  .post(async (req, res) => {
+    debug(`Removing guestbook entry!\n${util.inspect(req.body)}`);
+    const ipAddress = req.body.ip;
+    const queueName = req.body.queue;
+    guestbookManager.removeEntry(ipAddress, queueName);
     res.sendStatus(200);
   });
 
@@ -36,6 +54,13 @@ router.route('/')
     const serverIp = req.headers.host.split(':')[0];
     const clientIp = req.connection.remoteAddress;
     const content = await guestbookDashboard.showDashboard(serverIp, clientIp);
+    res.send(content);
+  });
+
+router.route('/admin')
+  .get(async (req, res) => {
+    const serverIp = req.headers.host.split(':')[0];
+    const content = await adminDashboard.showDashboard(serverIp);
     res.send(content);
   });
 
